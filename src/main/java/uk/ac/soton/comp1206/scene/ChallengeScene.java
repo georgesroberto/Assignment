@@ -19,6 +19,9 @@ public class ChallengeScene extends BaseScene {
     private static final Logger logger = LogManager.getLogger(MenuScene.class);
     protected Game game;
 
+    // Add a Multimedia field
+    private final Multimedia multimedia = new Multimedia();
+
     /**
      * Create a new Single Player challenge scene
      * @param gameWindow the Game Window
@@ -103,6 +106,10 @@ public class ChallengeScene extends BaseScene {
     public void initialise() {
         logger.info("Initialising Challenge");
         game.start();
+
+         // Play background music
+        multimedia.playMusic("path/to/background/music.mp3");
+
     }
 
 }

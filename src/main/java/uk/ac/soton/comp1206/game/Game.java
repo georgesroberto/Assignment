@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.ac.soton.comp1206.component.GameBlock;
+import uk.ac.soton.comp1206.scene.Multimedia;
 
 /**
  * The Game class handles the main logic, state and properties of the TetrECS game. Methods to manipulate the game state
@@ -16,6 +17,8 @@ public class Game {
 
     private static final Logger logger = LogManager.getLogger(Game.class);
 
+     // Add a Multimedia field
+    private final Multimedia multimedia = new Multimedia();
     /**
      * Number of rows
      */
@@ -154,35 +157,77 @@ public class Game {
     }
 
     public void afterPiecePlayed() {
-        // Clear any full vertical or horizontal lines that have been made
-        // This is a simple implementation and may need to be updated based on your game rules
-        for (int i = 0; i < grid.getRows(); i++) {
-            boolean fullRow = true;
-            for (int j = 0; j < grid.getCols(); j++) {
-                if (grid.get(j, i) == 0) {
-                    fullRow = false;
-                    break;
-                }
-            }
-            if (fullRow) {
-                for (int j = 0; j < grid.getCols(); j++) {
-                    grid.set(j, i, 0);
+        // Assume piece is the GamePiece that was just played
+        GamePiece piece = this.currentPiece;
+
+        int lines = 0;
+        int blocks = 0;
+
+        // Count the number of blocks in the piece
+        for (int[] row : piece.getBlocks()) {
+            for (int block : row) {
+                if (block != 0) {
+                    blocks++;
                 }
             }
         }
-        for (int i = 0; i < grid.getCols(); i++) {
-            boolean fullCol = true;
-            for (int j = 0; j < grid.getRows(); j++) {
-                if (grid.get(i, j) == 0) {
-                    fullCol = false;
+
+        // Check each row and column in the grid
+        for (int i = 0; i < grid.getRows(); i++) {
+            boolean rowFull = true;
+            for (int j = 0; j < grid.getCols(); j++) {
+                if (grid.get(j, i) == 0) {
+                    rowFull = false;
                     break;
                 }
             }
-            if (fullCol) {
-                for (int j = 0; j < grid.getRows(); j++) {
-                    grid.set(i, j, 0);
+            if (rowFull) {
+                lines++;
+            }
+        }
+        for (int i = 0; i < grid.getCols(); i++) {
+            boolean colFull = true;
+            for (int j = 0; j < grid.getRows(); j++) {
+                if (grid.get(i, j) == 0) {
+                    colFull = false;
+                    break;
                 }
             }
+            if (colFull) {
+                lines++;
+            }
+        }
+
+        // Call the score method
+        score(lines, blocks);
+
+         // Play a sound effect when a piece is played
+        multimedia.playAudio("path/to/sound/effect.mp3");
+    }
+
+    /*
+     * 
+     * TODO: Implement Score 
+     */
+
+
+    public void score(int lines, int blocks) {
+        // Calculate the score based on the number of lines, number of blocks, and the multiplier
+        int scoreIncrease = lines * blocks * 10 * getMultiplier();
+
+        // Increase the score
+        setScore(getScore() + scoreIncrease);
+
+        // Increase the level if the score has reached a multiple of 1000
+        if (getScore() >= getLevel() * 1000) {
+            setLevel(getLevel() + 1);
+        }
+
+        // Reset the multiplier if no lines were cleared, otherwise increase it
+        if (lines == 0) {
+            setMultiplier(1);
+        } else {
+            setMultiplier(getMultiplier() + 1);
         }
     }
 
